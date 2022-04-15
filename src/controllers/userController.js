@@ -1,8 +1,6 @@
-const userModel = require("../models/userModel")
 const UserModel = require("../models/userModel")
 const bcrypt = require('bcrypt')
 const aws = require("../aws/aws.js")
-const mongoose = require('mongoose')
 const jwt = require('jsonwebtoken')
 
 
@@ -21,9 +19,6 @@ const isValidPassword=/^[a-zA-Z0-9!@#$%^&*]{8,15}$/
 const isValidEmail=/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
 const isValidPinCode=/^[1-9]{1}[0-9]{2}\\s{0, 1}[0-9]{3}$/
 
-const isValidObjectId = function(objectId) {
-    return mongoose.Types.ObjectId.isValid(objectId)
-}
 
 // ============================================CREATE USER===============================================
 
@@ -37,7 +32,7 @@ const createUser = async (req, res) => {
 
 
         if (files && files.length > 0) {
-          profileImage = await aws.uploadFile(files[0])
+          profileImageUrl = await aws.uploadFile(files[0])
           data.profileImage = profileImage;
         }
         else { return res.status(404).send({ message: "No file found" }) }
@@ -87,10 +82,10 @@ const createUser = async (req, res) => {
             res.status(400).send({ status: false, message: 'please provide shipping pincode' })
             return
           } 
-        if (!(isValidPinCode.test(pincode))) {
-          res.status(400).send({ status: false, message: 'please provide valid shipping Pincode.' })
-          return
-        }
+        // if (!(isValidPinCode.test(pincode))) {
+        //   res.status(400).send({ status: false, message: 'please provide valid shipping Pincode.' })
+        //   return
+        // }
       }
         else {
           return res.status(400).send({ status: false, message: "Invalid request parameters, Shipping address cannot be empty" })
@@ -109,10 +104,10 @@ const createUser = async (req, res) => {
             res.status(400).send({ status: false, message: 'please provide billing pincode' })
             return
           }
-          if (!(isValidPinCode.test(pincode))) {
-            res.status(400).send({ status: false, message: 'please provide valid billing Pincode.' })
-            return
-          }
+          // if (!(isValidPinCode.test(pincode))) {
+          //   res.status(400).send({ status: false, message: 'please provide valid billing Pincode.' })
+          //   return
+          // }
         }
         else {
           return res.status(400).send({ status: false, message: "Invalid request parameters, billing address cannot be empty" })
@@ -141,7 +136,7 @@ const createUser = async (req, res) => {
             return
           }
         const salt = bcrypt.genSaltSync(10);
-        const encryptedPass= await bcrypt.hash(data.password, salt);
+        const encryptedPass= await bcrypt.hash(password, salt);
  
 
         const finalData = {
@@ -238,9 +233,9 @@ const getUser= async(req, res)=>{
             res.status(404).send({status:false, message:"User not found with UserId"})
         }
 
-        if(req.user!=isUserIdPresent._id){
-          res.status(401).send({status:false, message:"You are not authorized to update"})
-        }
+        // if(req.user!=isUserIdPresent._id){
+        //   res.status(401).send({status:false, message:"You are not authorized to update"})
+        // }
 
         res.status(200).send({status:true, message:"User profile details", data:isUserIdPresent})
     } catch (err) {
@@ -256,8 +251,7 @@ const updateUser= async(req, res)=>{
         let userId=req.params.userId
         let { fname, lname, email, phone, password, address } = data
 
-
-        if(!Object.keys(data).length>0) return res.status(400).send({status:true, message:"Please Provide Some data to update"})
+        if(!profileImage && !Object.keys(data).length>0) return res.status(400).send({status:false, message:"Please Provide Some data to update"})
 
         if (!/^[0-9a-fA-F]{24}$/.test(userId)) {
             return res
@@ -265,13 +259,14 @@ const updateUser= async(req, res)=>{
               .send({ status: false, message: "please provide valid UserId" });
           }
 
-        if(profileImage){
-        if (profileImage && profileImage.length > 0) {
-            profileImageUrl = await aws.uploadFile(profileImage[0])
-            data.profileImage = profileImageUrl;
-            console.log(profileImageUrl)
-          }
-        }
+
+          if(profileImage){
+            if (profileImage && profileImage.length > 0) {
+                profileImageUrl = await aws.uploadFile(profileImage[0])
+                data.profileImage = profileImageUrl;
+              }
+            }
+
 
         if (!isValid2(fname)) {
             res.status(400).send({ status: false, message: "First name can't be empty" })
@@ -383,37 +378,3 @@ const updateUser= async(req, res)=>{
 }
 
 module.exports = {createUser, login, getUser, updateUser}
-
-
-
-
-// const updatedData = async function(req, res) {
-//     try {
-//         let data = req.body;
-//         let userId = req.params.userId;
-
-//         if (!isValid(userId)) {
-//             res.status(400).send({ status: false, msg: "UserId is required" })
-//             return
-//         }
-//         if (!isValidObjectId(userId)) {
-//             res.status(404).send({ status: false, msg: "Invalid UserId" })
-//             return
-//         }
-
-//         let userUpdatedData = await userModel.findById({ _id: userId })
-
-//         if (!isValid(userUpdatedData)) {
-//             res.status(400).send({ status: false, msg: "No user data found with this userId" })
-//             return
-//         } else {
-//             await userModel.findByIdAndUpdate({ _id: userId }, data, { new: true })
-//             let updateDetails = await userModel.find({ _id: userId })
-//             res.status(200).send({ status: true, msg: "Data updated Successfully", data: updateDetails })
-//             return
-//         }
-//     } catch (error) {
-//         console.log(error);
-//         res.status(500).send({ msg: error.message });
-//     }
-// };
