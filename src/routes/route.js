@@ -31,9 +31,9 @@ router.put("/products/:productId", ProductController.updateProduct)
 
 
 router.post("/users/:userId/cart", CartController.addToCart)
-router.put("/users/:userId/cart", CartController.addToCart)
-router.get("/users/:userId/cart", CartController.addToCart)
-router.delete("/users/:userId/cart", CartController.addToCart)
+router.put("/users/:userId/cart", CartController.updateCart)
+router.get("/users/:userId/cart", CartController.getCart)
+router.delete("/users/:userId/cart", CartController.deleteCart)
 
 
 //============================ORDER=======================================
