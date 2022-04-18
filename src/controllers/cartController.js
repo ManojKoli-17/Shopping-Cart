@@ -252,14 +252,14 @@ const getCart = async(req, res)=>{
     
         if (!isValidObjId.test(userId)) { return res.status(400).send({ status: false, message: "Valid userId is required" }) }
     
-        const oneUser = await UserModel.findOne({ _id: userId })
+        const isUserIdPresent = await UserModel.findOne({ _id: userId })
 
-        if (!oneUser){ return res.status(400).send({ status: false, Data: "No data found with this userId" })}
+        if (!isUserIdPresent){ return res.status(400).send({ status: false, Data: "No data found with this userId" })}
      
         const returningCart=await CartModel.find({userId:userId})
         if (!returningCart){ return res.status(400).send({ status: false, Data: "No Items added to cart" })}
        
-        // let detailsOfItemsByUser={oneUser,returningCart}
+        // let detailsOfItemsByUser={isUserIdPresent,returningCart}
 
         return res.status(200).send({status:true,message: 'Success',data:returningCart})
     }catch (err) {

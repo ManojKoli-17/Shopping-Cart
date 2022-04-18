@@ -8,13 +8,15 @@ const ProductController = require('../controllers/productController')
 const CartController = require("../controllers/cartController")
 const OrderController = require("../controllers/orderController")
 
+const middleWare = require("../middlewares/userMiddleware")
+
 //================================USER===================================
 
 
 router.post("/register", UserController.createUser)
 router.post("/login", UserController.login)
 router.get("/user/:userId/profile", UserController.getUser)
-router.put("/user/:userId/profile", UserController.updateUser)
+router.put("/user/:userId/profile",middleWare.mid1, UserController.updateUser)
 
 
 //============================PRODUCT====================================

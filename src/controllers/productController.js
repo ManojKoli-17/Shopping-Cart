@@ -17,9 +17,12 @@ const isValid2 = function (value) {
   return true;
 };
 
+
+// ============================================ CREATE PRODUCT ===============================================
+
 const createProduct = async (req, res) => {
   try {
-      data=req.body
+      const data=req.body
       const files = req.files
       if(!Object.keys(data).length>0) return res.status(400).send({status:true, message:"Please Provide product data in body"})
       let { title, description, price, currencyId, currencyFormat} = data
@@ -64,7 +67,9 @@ const createProduct = async (req, res) => {
     res.status(500).send({ status: false, message: err.message });
   }
 };
- 
+
+
+// ========================================== GET PRODUCT BY QUERY ============================================
 
 const getProductByQuery = async (req, res) => {
   try {
@@ -151,6 +156,9 @@ const getProductByQuery = async (req, res) => {
   }
 };
 
+
+// ========================================== GET PRODUCT BY PARAMS ===========================================
+
 const getProductByParams = async (req, res) => {
   try {
     let productId=req.params.productId
@@ -175,17 +183,29 @@ const getProductByParams = async (req, res) => {
 };
 
 
+// ============================================ UPDATE  PRODUCT ===============================================
+
 const updateProduct = async (req, res) => {
   try {
     const data=req.body
+    const productImage = req.files
     let productId=req.params.productId
 
-    let { title, description, price, currencyId, currencyFormat, productImage } = data
+    let { title, description, price, currencyId, currencyFormat } = data
     if (!isValidObjId.test(productId)) {
       return res
         .status(400)
         .send({ status: false, message: "please provide valid Product" });
     }
+
+    if (productImage && productImage.length > 0) {
+      productImageUrl = await aws.uploadFile(productImage[0])
+      data.productImage = productImageUrl;
+      }
+    // else{
+    //   return res.status(404).send({status:false, message:"File not found"})
+    // }
+
 
     if (!isValid2(title)) {
       res.status(400).send({ status: false, message: "Title can't be empty, please provide title" })
@@ -207,15 +227,12 @@ const updateProduct = async (req, res) => {
       res.status(400).send({ status: false, message: "CurrencyFormat can't be empty, please provide currencyFormat" })
       return
     }
-    if (!isValid2(productImage)) {
-      res.status(400).send({ status: false, message: "ProductImage can't be empty, please provide productImage" })
-      return
-    }
 
 
     const isTitlePresent=await ProductModel.findOne({title:title})
     if(isTitlePresent){
       res.status(400).send({status:false, message:"This title is already present, plz provide anothor title"})
+      return
     }
 
     const isProductIdPresent=await ProductModel.findOne({_id:productId, isDeleted:false})
@@ -225,11 +242,20 @@ const updateProduct = async (req, res) => {
       return
     }
 
+    const updatedProduct=await ProductModel.findByIdAndUpdate(productId, data,{new:true})
+
+
+    res.status(200).send({ status: true, message: "Product updated sucessfully", data:updatedProduct });
+
 
   } catch (err) {
     res.status(500).send({ status: false, message: err.message });
   }
 };
+
+
+// ============================================ DELETE PRODUCT ===============================================
+
 const deleteProduct = async (req, res) => {
   try {
     let productId=req.params.productId

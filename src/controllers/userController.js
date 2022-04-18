@@ -197,7 +197,7 @@ const login= async(req,res)=>{
                     },
                     "products-management",
                     {expiresIn:"59m"})
-                    res.setHeader("Authorization", token);
+                    // res.setHeader("Authorization", token);
 
                     const userData={
                         userId:isEmailPresent._id,
@@ -363,10 +363,10 @@ const updateUser= async(req, res)=>{
             res.status(400).send({status:false, message:"This Mobile No. is already present you can't upadate it"})
         }
 
-        // if(req.user!=isUserIdPresent._id){
-        //   res.status(401).send({status:false, message:"You are not authorized to update"})
-        //   return
-        // }
+        if(req.user!=isUserIdPresent._id){
+          res.status(401).send({status:false, message:"You are not authorized to update"})
+          return
+        }
 
         let userData= await UserModel.findByIdAndUpdate(userId, data,{new:true})
         res.status(200).send({ status: true, message:"User profile updated", data: userData });
