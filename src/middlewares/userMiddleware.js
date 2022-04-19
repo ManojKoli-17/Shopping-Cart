@@ -3,17 +3,17 @@ const jwt = require("jsonwebtoken");
 const mid1 = async function (req, res, next) {
   try {
     //Authentication
-    const token = req.headers["authorization"];
-    if (!token) {
+    const bearerHeader = req.header('Authorization', 'Bearer')
+    if (!bearerHeader) {
       return res
         .status(404)
         .send({ status: false, message: "token must be present" });
     }
 
-        const bearer=token.split(' ')
-        const bearerToken=bearer[1]
+        const bearer = bearerHeader.split(' ');
+        const token = bearer[1];
   //Authorization
-    var decodedToken = jwt.verify(bearerToken, "books-management");
+    var decodedToken = jwt.verify(token, "products-management");
 
     if(!decodedToken){
       res.status(400).send({status:false, message:"Invalid token"})

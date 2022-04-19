@@ -25,7 +25,7 @@ const isValidPinCode=/^[1-9]{1}[0-9]{2}\\s{0, 1}[0-9]{3}$/
 const createUser = async (req, res) => {
     try {
         const data= req.body
-        // console.log(data)
+        
         const files = req.files
         if(Object.keys(data).length === 0) return res.status(400).send({status:true, message:"Please Provide User data in body"})
         let { fname, lname, email, phone, password, address } = data
@@ -37,7 +37,7 @@ const createUser = async (req, res) => {
         }
         else { return res.status(404).send({ message: "No file found" }) }
 
-        if (!isValid(data.fname)) {
+        if (!isValid(fname)) {
             res.status(400).send({ status: false, message: 'please provide first name' })
             return
           }
@@ -86,7 +86,7 @@ const createUser = async (req, res) => {
         //   res.status(400).send({ status: false, message: 'please provide valid shipping Pincode.' })
         //   return
         // }
-      }
+        }
         else {
           return res.status(400).send({ status: false, message: "Invalid request parameters, Shipping address cannot be empty" })
         }
@@ -197,7 +197,6 @@ const login= async(req,res)=>{
                     },
                     "products-management",
                     {expiresIn:"59m"})
-                    // res.setHeader("Authorization", token);
 
                     const userData={
                         userId:isEmailPresent._id,
@@ -306,7 +305,7 @@ const updateUser= async(req, res)=>{
               res.status(400).send({ status: false, message: "Shipping City name can't be empty" })
               return
             }
-            if (!(pincode)) {
+            if (!isValid2(pincode)) {
               res.status(400).send({ status: false, message: "Shipping pincode can't be empty" })
               return
             } 
@@ -322,7 +321,7 @@ const updateUser= async(req, res)=>{
               res.status(400).send({ status: false, message: "billing City name can't be empty" })
               return
             }
-            if (!(pincode)) {
+            if (!isValid2(pincode)) {
               res.status(400).send({ status: false, message: "billing Pincode can't be empty" })
               return
             } 

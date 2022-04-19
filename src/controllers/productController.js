@@ -25,7 +25,7 @@ const createProduct = async (req, res) => {
       const data=req.body
       const files = req.files
       if(!Object.keys(data).length>0) return res.status(400).send({status:true, message:"Please Provide product data in body"})
-      let { title, description, price, currencyId, currencyFormat} = data
+      let { title, description, price, currencyId, currencyFormat,availableSizes} = data
 
       if (files && files.length > 0) {
         productImageUrl = await aws.uploadFile(files[0])
@@ -54,6 +54,12 @@ const createProduct = async (req, res) => {
         return
       }
 
+      if (availableSizes) {
+        if(!["S", "XS", "M", "X", "L", "XXL", "XL"].includes(availableSizes)){
+          return res.status(400).send({status : false, message : "availableSizes should be from [S, XS, M, X, L, XXL, XL]"})
+        }
+      }
+
       const isTitlePresent=await ProductModel.findOne({title:title})
       if(isTitlePresent){
         res.status(400).send({status:false, message:"This title is already in use, plz provide anothor title"})
@@ -73,73 +79,73 @@ const createProduct = async (req, res) => {
 
 const getProductByQuery = async (req, res) => {
   try {
-    let { name, description, price, currencyId, currencyFormat, style, size,priceGreaterThan,priceLessThan, priceSort } = req.query;
-    let obj = {};
-    if (name != null) obj.name = name;
-    if (description != null) obj.description = description;
-    if (price != null) obj.price = price;
-    if (currencyId != null) obj.currencyId = currencyId;
-    if (currencyFormat != null) obj.currencyFormat = currencyFormat;
-    if (style != null) obj.style = style;
-    if (size != null) obj.size = size;
-    if (priceGreaterThan != null) obj.priceGreaterThan = priceGreaterThan;
-    if (priceLessThan != null) obj.priceLessThan = priceLessThan;
-    if (priceSort != null) obj.priceSort = priceSort;
+    let { name, description, price, currencyId, currencyFormat, style, size, priceGreaterThan,priceLessThan, priceSort } = req.query;
+    let myObj = {};
+    if (name != null) myObj.name = name;
+    if (description != null) myObj.description = description;
+    if (price != null) myObj.price = price;
+    if (currencyId != null) myObj.currencyId = currencyId;
+    if (currencyFormat != null) myObj.currencyFormat = currencyFormat;
+    if (style != null) myObj.style = style;
+    if (size != null) myObj.size = size;
+    if (priceGreaterThan != null) myObj.priceGreaterThan = priceGreaterThan;
+    if (priceLessThan != null) myObj.priceLessThan = priceLessThan;
+    if (priceSort != null) myObj.priceSort = priceSort;
 
-    obj.isDeleted = false;
+    myObj.isDeleted = false;
 
-    obj['availableSizes']=size
+    if(!Object.keys(req.query).length>0) return res.status(400).send({status:true, message:"Please Provide Product data in query"})
 
-    if(Object.keys(obj).length === 0) return res.status(400).send({status:true, message:"Please Provide Product data in query"})
+  if("size" in myObj){
+      myObj['availableSizes']=size
+      if (size) {
+        if(!["S", "XS", "M", "X", "L", "XXL", "XL"].includes(size)){
+          return res.status(400).send({status : false, message : "Size should be from [S, XS, M, X, L, XXL, XL]"})
+        }
+      }
+    }
 
 
-    if("name" in obj){
-    obj['title']={$regex:name}
+  if("name" in myObj){
+    myObj['title']={$regex:name}
     if (!isValid(name)) {
       res.status(400).send({ status: false, message: "Product name can't be empty"})
       return
     }
   }
-  
-  if(("priceGreaterThan" && "priceLessThan") in obj){
-    obj['price']={$gte:priceGreaterThan}
-    obj['price']={$lte:priceLessThan}
-    const productData= await ProductModel.find(obj)
+
+  if("priceGreaterThan" in myObj && "priceLessThan" in myObj){
+    myObj['price']={$gte:priceGreaterThan}
+    myObj['price']={$lte:priceLessThan}
+    const productData= await ProductModel.find(myObj)
     res.status(200).send({status:true, message:`Product between price ${priceGreaterThan} to ${priceLessThan}`, data:productData})
     return
   }
 
-  if("priceGreaterThan" in obj){
-    obj['price']={$gte:priceGreaterThan}
-    const productData= await ProductModel.find(obj)
+  if("priceGreaterThan" in myObj){
+    myObj['price']={$gte:priceGreaterThan}
+    const productData= await ProductModel.find(myObj)
     res.status(200).send({status:true, message:`Product greater than ${priceGreaterThan}`, data:productData})
     return
   }
-  if("priceLessThan" in obj){
-    obj['price']={$lte:priceLessThan}
-    const productData= await ProductModel.find(obj)
+
+  if("priceLessThan" in myObj){
+    myObj['price']={$lte:priceLessThan}
+    const productData= await ProductModel.find(myObj)
     res.status(200).send({status:true, message:`Product less than ${priceLessThan}`, data:productData})
     return
   }
 
 
-
-    const productData= await ProductModel.find(obj)
-
-    if(productData.length===0){
-      res.status(404).send({status:false, message:"Product Data not Found"})
-      return
-    }
-
-    if("priceSort" in obj){
+    if("priceSort" in myObj){
 
     if(priceSort==1){
-      const productData= await ProductModel.find(obj).sort({price:1})
+      const productData= await ProductModel.find(myObj).sort({price:1})
       res.status(200).send({status:true, message:"Data Found with Ascending price", data:productData})
       return
     }    
     if(priceSort==-1){
-      const productData= await ProductModel.find(obj).sort({price:-1})
+      const productData= await ProductModel.find(myObj).sort({price:-1})
       res.status(200).send({status:true, message:"Data Found with Descending price", data:productData})
       return
     }
@@ -147,6 +153,13 @@ const getProductByQuery = async (req, res) => {
         res.status(400).send({status:false, message:"PriceSort Should be 1=(Ascending) or -1=(Descending)"})
         return
     }
+  }
+
+  const productData = await ProductModel.find(myObj)
+
+  if(productData.length===0){
+    res.status(404).send({status:false, message:"Product Data not Found"})
+    return
   }
 
     res.status(200).send({status:true, message:"Data Found", data:productData})
