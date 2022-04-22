@@ -142,7 +142,7 @@ const updateOrder = async function (req, res) {
         if (!(arr.includes(status))) {
             return res.status(400).send({ status: false, message: `Status must be among [${arr}]` })
         }
-
+ 
         if (findOrder.cancellable == true) {
 
             if (findOrder.status == 'pending') {

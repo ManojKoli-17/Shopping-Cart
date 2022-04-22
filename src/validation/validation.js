@@ -17,7 +17,7 @@ const isValidObjectId = function(objectId) {
 }
 const isValidRequestBody = function(requestBody) {
     return Object.keys(requestBody).length > 0;
-}
+} 
 
 const validString = function(value) {
     if (typeof value === 'string' && value.trim().length === 0) return false

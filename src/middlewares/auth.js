@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-
+ 
 const middleware = async function (req, res, next) {
     try {
         const token = req.header('Authorization', 'Bearer Token')

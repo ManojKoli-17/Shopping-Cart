@@ -398,7 +398,7 @@ const updateProfile = async function (req, res) {
         }
         
         // profileImage = await aws.uploadFile(files[0])
-        
+         
         let updateUserProfile = await userModel.findOneAndUpdate({ _id: userId }, {
             $set: {
                 fname: fname,

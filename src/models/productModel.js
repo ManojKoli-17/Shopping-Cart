@@ -18,7 +18,7 @@ const productSchema = new mongoose.Schema({
     currencyId: {
         type: String,
         required: true
-    },
+    }, 
     currencyFormat: {
         type: String,
         required: true,

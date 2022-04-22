@@ -12,7 +12,7 @@ router.post('/login', userController.userLogin)
 router.get('/user/:userId/profile', middleware.middleware, userController.getUserProfile)
 router.put('/user/:userId/profile', middleware.middleware, userController.updateProfile)
 
-// Products
+// Products 
 router.post('/products', productController.productCreation)
 router.get('/products',productController.getAllProducts)
 router.get('/products/:productId', productController.getProductsById)
