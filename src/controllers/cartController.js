@@ -128,6 +128,7 @@ const updateCart = async function(req, res) {
 
         if (!validator.isValid1(productId)) { return res.status(400).send({ status: false, msg: "productId is required" }) }
         if (!(/^(?=[a-f\d]{24}$)(\d+[a-f]|[a-f]+\d)/.test(productId.trim()))) { return res.status(400).send({ status: false, message: "Please put a valid product id in body" }) }
+        
         const product = await productModel.findOne({ _id: productId, isDeleted: false })
         if (!product) { return res.status(404).send({ status: false, msg: "product not exist or deleted" }) }
 

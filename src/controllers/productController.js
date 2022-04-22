@@ -108,7 +108,7 @@ const getAllProducts = async function(req,res) {
             return res.status(400).send({ status: false, message: `Don't you understand about query params` })
         }
 
-        const { name, priceGreaterThan, priceLessThan, priceSort, size } = queryParams
+        const { name, price, priceGreaterThan, priceLessThan, priceSort, size } = queryParams
 
         const product = {}
 
@@ -121,6 +121,17 @@ const getAllProducts = async function(req,res) {
             }
             else {
                 return res.status(400).send({status: false, message: `product not found with this ${size}`})
+            }
+        }
+        if(price) {
+
+            const searchPrice = await productModel.find({price: price, isDeleted: false}).sort({price: priceSort})
+
+            if(searchPrice.length !== 0) {
+                return res.status(200).send({ status: true, message: 'Success', data: searchPrice})
+            }
+            else {
+                return res.status(400).send({status: false, message: `product not found with this ${price}`})
             }
         }
 
